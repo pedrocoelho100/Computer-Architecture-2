@@ -1,0 +1,60 @@
+		.equ READ_CORE_TIMER,11
+ 		.equ RESET_CORE_TIMER,12
+ 		.equ PUT_CHAR,3
+ 		.equ PRINT_INT,6
+ 		.data
+ 		.text
+ 		.globl main
+main: 	subu $sp,$sp,4
+		sw $ra,0($sp)
+		
+		li $t4,40000
+while: 	
+while1:	li $v0,READ_CORE_TIMER 	# while (1) {
+ 		syscall 				#
+ 		
+ 		blt $v0,$t4,while1 	# while(readCoreTimer() < 40000);
+ 		
+ 		li $v0, RESET_CORE_TIMER
+ 		syscall # resetCoreTimer();
+ 		
+ 		lui $t1,0xBF88
+ 		lw $t2,0x6050($t1)		# read the binary value from the 4 switches
+
+		andi $t2,$t2,0x000F
+ 		
+ 		addu $t3,$t2,-16
+ 		mul $t0,$t3,64
+ 		
+ 		move $a0,$t0 			#
+ 		jal delay				# 
+ 		move $t4,$v0
+ 		
+ 		move $a0,$t2 			#
+ 		li $a1,0x00040002 		#
+ 		li $v0, PRINT_INT 		#
+ 		syscall 				# printInt(t2, 2);
+ 		
+ 		j while					# }
+ 		
+ 		lw $ra,0($sp)
+		addu $sp,$sp,4
+		
+ 		jr $ra 					#
+ 		
+delay:	
+		move $t0, $a0
+ford:	beqz $t0, endfd
+
+		li $v0, RESET_CORE_TIMER
+ 		syscall # resetCoreTimer();
+ 		
+whiled:	li $v0,READ_CORE_TIMER 	
+ 		syscall 				
+				
+ 		blt $v0,20000,whiled 	# while(readCoreTimer() < 20000);
+ 		
+ 		subu $t0,$t0,1
+	 	j ford					# }
+endfd:
+ 		jr $ra 					#

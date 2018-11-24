@@ -1,0 +1,38 @@
+# Programa 3 – teste dos system calls "getChar()" e "putChar()"
+
+#int main(void)
+#{
+# char c;
+# while (1)
+# {
+# c = getChar();
+# if (c == '\n')
+# break;
+# putChar(c);
+# }
+# return 1;
+#}
+
+	.equ PRINT_STR,8
+	.data
+	.text
+ 	.globl main
+ 	
+ main: 
+ while:
+ 	li $v0, 2
+ 	syscall
+ 	
+ 	move $t0,$v0
+ 	beq $t0,'\n',endwhile
+ 	li $v0,3
+ 	move $a0,$t0
+ 	syscall
+ 	j while
+ 	 
+ endwhile : li $v0,1
+ 	    jr $ra
+ 	    
+ 	   
+
+

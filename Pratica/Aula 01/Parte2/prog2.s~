@@ -1,0 +1,40 @@
+#*************************************************************************
+# Programa 2 – teste do system call "inkey()"
+#
+#int main(void)
+#{
+#	char c;
+#	while (1)
+#	{
+#		while ((c = inkey()) == 0);
+# 		if (c == '\n')
+# 			break;
+# 		printStr("Key pressed\n");
+# 	}
+# 	return 0;
+#} 
+
+		.equ PRINT_STR,8
+		.data
+msg:	.asciiz "Key pressed\n"
+		.text
+ 		.globl main
+ 
+main:	
+
+while:	
+		li 	$v0, 1
+		syscall
+		move $t0, $v0
+		beqz $t0, while
+		
+		bne $t0,'n',endif
+		j	end
+		
+endif:	li 	$v0,8
+		la 	$a0,msg
+		syscall				# printStr("Key pressed\n");
+		j	while
+end:		
+		ori $v0,$0,0 		# return 0;
+ 		jr 	$ra 

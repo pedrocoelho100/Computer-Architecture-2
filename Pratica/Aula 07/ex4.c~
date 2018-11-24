@@ -1,0 +1,46 @@
+#include <detpic32.h>
+
+// 500ms  -> 2 hz
+// 100ms  -> 10hz
+// 10ms -> 100hz
+
+void isr_T1(void);
+void isr_T3(void);
+
+void main(void)
+{
+	// Configure Timers T1 and T3 with interrupts enabled)
+	T1CONbits.TCKPS = 5; 		// 1:256 prescaler
+    PR1 = 62499;         		// Fout = 20MHz / (256 * (39061 + 1)) = 2Hz 
+    TMR1 = 0;            		// Reset timer T3 count register 
+    T1CONbits.TON = 1;
+	
+	IPC1bits.T1IP = 2; 			// Interrupt priority (must be in range [1..6])
+ 	IEC0bits.T1IE = 1; 			// Enable timer T1 interrupts
+ 	IFS0bits.T1IF = 0; 			// Reset timer T1 interrupt flag 
+ 	
+	T3CONbits.TCKPS = 7; 		// 1:256 prescaler (i.e Fout_presc = 78125 Hz)
+ 	PR3 = 39061; 		 		// PR3 = (78125Hz / 2Hz) – 1 ≅ 39061
+ 	TMR3 = 0; 			 		// Reset timer T3 count register
+ 	T3CONbits.TON = 1; 	 		// Enable timer T3
+ 	
+	IPC3bits.T3IP = 2; 			// Interrupt priority (must be in range [1..6])
+ 	IEC0bits.T3IE = 1; 			// Enable timer T3 interrupts
+ 	IFS0bits.T3IF = 0; 			// Reset timer T3 interrupt flag 
+	// Reset T1IF and T3IF flags
+	
+	
+	EnableInterrupts(); // Global Interrupt Enable
+	while(1);
+} 
+
+void _int_(VECTOR_TIMER1) isr_T1(void)
+{
+	printStr("1");		// print character '1'
+	IFS0bits.T1IF = 0;	// Reset T1IF flag
+}
+void _int_(VECTOR_TIMER3) isr_T3(void)
+{
+	printStr("3");		// print character '3'
+	IFS0bits.T3IF = 0;	// Reset T3IF flag
+}
